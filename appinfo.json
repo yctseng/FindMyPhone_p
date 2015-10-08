@@ -1,0 +1,42 @@
+{
+    "appKeys": {
+        "dummy": 0
+    },
+    "capabilities": [
+        ""
+    ],
+    "companyName": "Pebble",
+    "longName": "PKAT2-pebble",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/ic_vibrate.png",
+                "menuIcon": true,
+                "name": "IMAGE_ACTION_ICON_VIBRATE",
+                "type": "png"
+            },
+            {
+                "file": "images/ic_stop.png",
+                "name": "IMAGE_ACTION_ICON_STOP",
+                "type": "png"
+            },
+            {
+                "file": "images/ic_ringtone.png",
+                "name": "IMAGE_ACTION_ICON_RINGTONE",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "FindMyPhone",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "3783cff2-5a14-477d-baee-b77bd423d079",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
