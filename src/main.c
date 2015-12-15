@@ -37,7 +37,9 @@ static GBitmap *s_icon_vibrate, *s_icon_stop, *s_icon_ringtone;
 
 static bool s_is_standby = false;
 static AppTimer *s_standby_timer = NULL;
+static AppTimer *s_init_update_timer = NULL;
 #define STANDBY_TIMEOUT 3000
+#define INIT_UPDATE_TIMEOUT 500
 
 static void send(int key, int value) {
     DictionaryIterator *iter;
@@ -65,19 +67,32 @@ static void set_current_mode(int mode) {
     }
 }
 
+static void cancel_standby() {
+    printf("It's NOT in standby mode. Going to show_actionbar");
+    s_is_standby = false;
+    show_actionbar(s_action_bar);
+    printf("s_is_standby:[%s]", s_is_standby ? "true":"false");
+    if(s_standby_timer != NULL) {
+        app_timer_cancel(s_standby_timer);
+        s_standby_timer = NULL;
+    }
+}
+
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     Tuple *t = dict_read_first(iter);
     while(t != NULL) {
         // Process this Tuple
 		
-        //printf("int32:[%ld] cstring:[%s]", t->value->int32, t->value->cstring);
+        printf("int32:[%ld] cstring:[%s]", t->value->int32, t->value->cstring);
         if (strcmp(t->value->cstring, STRING_MODE_STOP) == 0) {
             set_current_mode(MODE_STOP);
         }
         else if(strcmp(t->value->cstring, STRING_MODE_VIBRATE) == 0) {
+            cancel_standby();
             set_current_mode(MODE_VIBRATE);
         }
         else if(strcmp(t->value->cstring, STRING_MODE_RINGING) == 0) {
+            cancel_standby();
             set_current_mode(MODE_RINGING);
         }
         else {
@@ -96,11 +111,18 @@ static void outbox_sent_handler(DictionaryIterator *iter, void *context) {
     text_layer_set_text(s_error_msg_layer, "");
 }
 
+
+static void init_update_timer_callback(void *data) {
+    // Query the status from APP in case it is already ringing. 
+    printf("Ken Query sent!!!!!\n");
+    send(KEY_QUERY_MODE, 0);
+}
+
 static void standby_timer_callback(void *data) {
     printf("standby_timer_callback!!! hide_actionbar");
     hide_actionbar(s_action_bar);
     s_is_standby = true;
-    text_layer_set_text(s_output_layer, STRING_TITLE);
+    //text_layer_set_text(s_output_layer, STRING_TITLE);
     printf("s_is_standby:[%s]", s_is_standby ? "true":"false");
 }
 
@@ -126,10 +148,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
     printf("up_click_handler");
     // Handle standby
     if(s_is_standby) {
-        printf("It's in standby mode. Going to show_actionbar");
-        show_actionbar(s_action_bar);
-        s_is_standby = false;
-        printf("s_is_standby:[%s]", s_is_standby ? "true":"false");
+        cancel_standby();
         
         s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
         printf("s_standby_timer registered");
@@ -156,10 +175,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
     printf("select_click_handler");
     // Handle standby
     if(s_is_standby) {
-        printf("It's in standby mode. Going to show_actionbar");
-        show_actionbar(s_action_bar);
-        s_is_standby = false;
-        printf("s_is_standby:[%s]", s_is_standby ? "true":"false");
+        cancel_standby();
         
         s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
         printf("s_standby_timer registered 1"); 
@@ -193,10 +209,7 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     printf("down_click_handler");
     // Handle standby
     if(s_is_standby) {
-        printf("It's in standby mode. Going to show_actionbar");
-        show_actionbar(s_action_bar);
-        s_is_standby = false;
-        printf("s_is_standby:[%s]", s_is_standby ? "true":"false");
+        cancel_standby();
         
         s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
         printf("s_standby_timer registered"); 
@@ -290,8 +303,10 @@ static void main_window_load(Window *window) {
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     update_time();
     
+   
     // Register timeout callback for standby mode to hide actionbar
     s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
+    s_init_update_timer = app_timer_register(INIT_UPDATE_TIMEOUT, init_update_timer_callback, NULL);
 }
 
 static void main_window_unload(Window *window) {
@@ -306,18 +321,20 @@ static void init(void) {
     s_icon_vibrate = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ACTION_ICON_VIBRATE);
     s_icon_stop = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ACTION_ICON_STOP);
     s_icon_ringtone = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ACTION_ICON_RINGTONE);
-
+    
+    // Open AppMessage
+    app_message_register_outbox_sent(outbox_sent_handler);
+    app_message_register_outbox_failed(outbox_failed_handler);
+    app_message_register_inbox_received(inbox_received_handler);
+    app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+    
     window_set_window_handlers(s_main_window, (WindowHandlers) {
         .load = main_window_load,
         .unload = main_window_unload,
     });
     window_stack_push(s_main_window, true);
 
-    // Open AppMessage
-    app_message_register_outbox_sent(outbox_sent_handler);
-    app_message_register_outbox_failed(outbox_failed_handler);
-    app_message_register_inbox_received(inbox_received_handler);
-    app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+
 }
 
 static void deinit(void) {
