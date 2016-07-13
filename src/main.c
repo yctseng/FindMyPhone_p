@@ -152,7 +152,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
         
         s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
         printf("s_standby_timer registered");
-        return;
+        //return;
     }
     else {
         if(s_standby_timer != NULL) {
@@ -179,7 +179,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
         
         s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
         printf("s_standby_timer registered 1"); 
-        return;
+        //return;
     }
     else {
         if(s_standby_timer != NULL) {
@@ -213,7 +213,7 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
         
         s_standby_timer = app_timer_register(STANDBY_TIMEOUT, standby_timer_callback, NULL);
         printf("s_standby_timer registered"); 
-        return;
+        //return;
     }
     else {
         if(s_standby_timer != NULL) {
