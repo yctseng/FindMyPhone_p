@@ -1,0 +1,47 @@
+{
+    "author": "Pebble",
+    "dependencies": {},
+    "keywords": [],
+    "name": "findmyphone",
+    "pebble": {
+        "capabilities": [
+            ""
+        ],
+        "displayName": "FindMyPhone",
+        "enableMultiJS": false,
+        "messageKeys": {
+            "dummy": 0
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/ic_vibrate.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_ACTION_ICON_VIBRATE",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ic_stop.png",
+                    "name": "IMAGE_ACTION_ICON_STOP",
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/ic_ringtone.png",
+                    "name": "IMAGE_ACTION_ICON_RINGTONE",
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "3783cff2-5a14-477d-baee-b77bd423d079",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.0.0"
+}
